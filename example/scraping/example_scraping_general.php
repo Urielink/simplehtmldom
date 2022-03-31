@@ -1,5 +1,5 @@
 <?php
-include_once('simple_html_dom.php');
+include_once('../../simple_html_dom.php');
 
 function scraping_generic($url, $search) {
 	// Didn't find it yet.
