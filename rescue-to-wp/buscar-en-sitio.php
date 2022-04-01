@@ -1,5 +1,5 @@
 <?php
-include_once('simple_html_dom.php');
+include_once('../simple_html_dom.php');
 
 // //Es posible que cuando pruebes este proxy no este activo, en caso de ser asi, busca uno
 // //que si lo este en cualquier pagina de proxies gratuitos en internet
@@ -42,6 +42,12 @@ function scraping_generic( $url, $search ) {
 		// 1. Funcion, buscar titulo.
 		$the_title = $the_html->find( 'h1', 1 )->plaintext;
 
+		// 1.2 convertir titulo a nicename.
+		$the_nicename = ekiline_cleanspchar($the_title);
+
+		// 1.3 crear ID random.
+		$the_id = rand(1000,10000);
+
 		// 2. Funcion, buscar imagen principal.
 		$img_obj     = 'div.page-content h1 img[src]';
 		$img_obj_url = $the_html->find( $img_obj, 0 )->src;
@@ -49,18 +55,20 @@ function scraping_generic( $url, $search ) {
 		// 3. Function, buscar contenido: contenedor > primer div > ultimo div.
 		$filter_content = $the_html->find( 'div.page-content', 0 )->find( 'div', 1 )->find( 'div', -1 )->innertext;
 
-		$content = str_get_html( $filter_content );
+		$the_content = str_get_html( $filter_content );
 		// limpiar.
-		foreach ( $content->find( 'h1, img, .carousel-item, .mceEditable' ) as $unwanted ) {
+		foreach ( $the_content->find( 'h1, img, .carousel-item, .mceEditable' ) as $unwanted ) {
 			$unwanted->outertext = '';
 		}
-		$content->load( $content->save() );
+		$the_content->load( $the_content->save() );
 
 		// resultado.
 		echo '<div style="border-bottom:red 1px solid;padding:10px;">';
+		echo '<code>' . $the_id . '</code>';
+		echo '<code>' . $the_nicename . '</code>';
 		echo '<h1>' . $the_title . '</h1>';
 		echo '<img src="' . $img_obj_url . '" width="100px" height="auto">';
-		echo $content;
+		echo $the_content;
 		echo '</div>';
 
 	}
@@ -72,3 +80,20 @@ function scraping_generic( $url, $search ) {
 	return $return;
 }
 
+function ekiline_cleanspchar($text) {
+
+    setlocale(LC_ALL, 'en_US.UTF8');
+    $text = iconv('UTF-8', 'ASCII//TRANSLIT', $text);
+    $alias = preg_replace("/[^a-zA-Z0-9\/_|+ -]/", '', $text);
+    $alias = strtolower(trim($alias, '-'));
+    $alias = preg_replace("/[\/_|+ -]+/", "-", $alias);
+
+    while (substr($alias, -1, 1) == "-") {
+        $alias = substr($alias, 0, -1);
+    }
+    while (substr($alias, 0, 1) == "-") {
+        $alias = substr($alias, 1, 100);
+    }
+
+    return $alias;
+}
