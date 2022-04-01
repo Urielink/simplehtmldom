@@ -1,4 +1,5 @@
 <?php
+include_once('buscar-en-sitio-return.php');
 header('Content-Type: application/xml; charset=utf-8');
 echo '<?xml version="1.0" encoding="UTF-8" ?>';
 echo ekiline_sitemap_xml();
@@ -68,31 +69,32 @@ function ekiline_sitemap_xml() { ?>
 
 	<generator>https://wordpress.org/?v=5.9.2</generator>
 
+<?php 
+
+$resultados = scraping_generic('https://www.fondounido.org.mx/blog', 'div.card a' );
+
+foreach( $resultados as $item ) { ?>
+
 	<item>
-		<title><![CDATA[machote titulo]]></title>
-		<link>http://localhost/wpdev/ekiline/2022/03/31/machote-titulo/</link>
+		<title><![CDATA[<?php echo $item['title'];?>]]></title>
+		<link>http://localhost/wpdev/ekiline/2022/03/31/<?php echo $item['nicename'];?>/</link>
 		<pubDate>Thu, 31 Mar 2022 23:30:17 +0000</pubDate>
 		<dc:creator><![CDATA[urielink]]></dc:creator>
-		<guid isPermaLink="false">http://localhost/wpdev/ekiline/?p=84</guid>
+		<guid isPermaLink="false">http://localhost/wpdev/ekiline/?p=<?php echo $item['id'];?></guid>
 		<description></description>
 		<content:encoded><![CDATA[<!-- wp:image {"sizeSlug":"large"} -->
-<figure class="wp-block-image size-large"><img src="https://cdn.givecloud.co/s/files/1/0000/1050/files/thumbnail-fum-banner-web.png" alt=""/></figure>
+<figure class="wp-block-image size-large"><img src="<?php echo $item['img_url'];?>" alt=""/></figure>
 <!-- /wp:image -->
-<!-- wp:paragraph -->
-<p>machote contenido con imagen</p>
-<!-- /wp:paragraph -->
-<!-- wp:html -->
-<p>machote en html, NOTA: Si se debe rescatar el dato, no necesita las etiquetas de wp.</p>
-<!-- /wp:html -->]]></content:encoded>
+<?php echo $item['content'];?>]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
-		<wp:post_id>84</wp:post_id>
+		<wp:post_id><?php echo $item['id'];?></wp:post_id>
 		<wp:post_date><![CDATA[2022-03-31 23:30:17]]></wp:post_date>
 		<wp:post_date_gmt><![CDATA[2022-03-31 23:30:17]]></wp:post_date_gmt>
 		<wp:post_modified><![CDATA[2022-03-31 23:30:17]]></wp:post_modified>
 		<wp:post_modified_gmt><![CDATA[2022-03-31 23:30:17]]></wp:post_modified_gmt>
 		<wp:comment_status><![CDATA[closed]]></wp:comment_status>
 		<wp:ping_status><![CDATA[closed]]></wp:ping_status>
-		<wp:post_name><![CDATA[machote-titulo]]></wp:post_name>
+		<wp:post_name><![CDATA[<?php echo $item['title'];?>]]></wp:post_name>
 		<wp:status><![CDATA[publish]]></wp:status>
 		<wp:post_parent>0</wp:post_parent>
 		<wp:menu_order>0</wp:menu_order>
@@ -101,6 +103,9 @@ function ekiline_sitemap_xml() { ?>
 		<wp:is_sticky>0</wp:is_sticky>
 		<category domain="category" nicename="historias-backup"><![CDATA[historias backup]]></category>
 	</item>
+
+<?php } ?>
+
 </channel>
 </rss>
 

@@ -1,36 +1,13 @@
 <?php
 include_once('../simple_html_dom.php');
 
-// //Es posible que cuando pruebes este proxy no este activo, en caso de ser asi, busca uno
-// //que si lo este en cualquier pagina de proxies gratuitos en internet
-// $proxyurl = '88.198.50.103:8080';
-
-// $context = stream_context_create();
-// stream_context_set_params($context, array(
-// 		'proxy' => $proxyurl,
-// 		'ignore_errors' => true,
-// 		'max_redirects' => 3)
-// 		);
-
-// $html = file_get_html('http://localhost/wpdev/ekiline/blog/', 0, $context);
-
-// $articles_titles = $html->find('h2');
-
-// foreach($articles_titles as $article_title) {
-// 	echo $article_title->plaintext . "\n\n";
-// }
-
-// $html->clear();
-// unset($html);
-
-// scraping_generic('http://localhost/wpdev/ekiline/blog/', 'h2 a' );
-
-scraping_generic('https://www.fondounido.org.mx/historias', 'div.card a' );
+// scraping_generic('https://www.fondounido.org.mx/blog5', 'div.card a' );
 
 function scraping_generic( $url, $search ) {
 
 	$return = false;
-	$html = file_get_html( $url );
+	$html   = file_get_html( $url );
+	$matriz = array();
 
 	// get article block
 	foreach( $html->find( $search ) as $found ) {
@@ -67,15 +44,18 @@ function scraping_generic( $url, $search ) {
 		$the_content->load( $the_content->save() );
 
 		// resultado.
-		echo '<div style="border-bottom:red 1px solid;padding:10px;">';
-		echo '<code>' . $the_id . '</code>';
-		echo '<code>' . $the_nicename . '</code>';
-		echo '<h1>' . $the_title . '</h1>';
-		echo '<img src="' . $img_obj_url . '" width="100px" height="auto">';
-		echo $the_content;
-		echo '</div>';
-
+		// echo '<div style="border-bottom:red 1px solid;padding:10px;">';
+		// echo '<code>' . $the_id . '</code>';
+		// echo '<code>' . $the_nicename . '</code>';
+		// echo '<h1>' . $the_title . '</h1>';
+		// echo '<img src="' . $img_obj_url . '" width="100px" height="auto">';
+		// echo $the_content;
+		// echo '</div>';
+		$matriz[] = [ 'id' => $the_id, 'nicename' => $the_nicename, 'title' => $the_title, 'content' => $the_content, 'img_url' => $img_obj_url ];
 	}
+
+	// print_r($matriz);
+	return $matriz;
 
 	// clean up memory
 	$html->clear();
