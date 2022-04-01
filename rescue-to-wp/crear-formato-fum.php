@@ -71,7 +71,23 @@ function ekiline_sitemap_xml() { ?>
 
 <?php 
 
-$resultados = scraping_generic('https://www.fondounido.org.mx/blog', 'div.card a' );
+// $resultados = scraping_generic('https://www.fondounido.org.mx/blog', 'div.card a' );
+
+$urls = [
+	'https://www.fondounido.org.mx/historias',
+	'https://www.fondounido.org.mx/historia',
+	'https://www.fondounido.org.mx/duplicado-historia',
+	'https://www.fondounido.org.mx/duplicado-2-historias',
+	'https://www.fondounido.org.mx/duplicado-3',
+	'https://www.fondounido.org.mx/duplicado-4',
+	'https://www.fondounido.org.mx/duplicado-5',
+	'https://www.fondounido.org.mx/duplicado-6',
+];
+
+foreach( $urls as $resultados ) {
+
+$resultados = scraping_generic($resultados, 'div.card a' );
+
 
 foreach( $resultados as $item ) { ?>
 
@@ -104,7 +120,7 @@ foreach( $resultados as $item ) { ?>
 		<category domain="category" nicename="historias-backup"><![CDATA[historias backup]]></category>
 	</item>
 
-<?php } ?>
+<?php } } ?>
 
 </channel>
 </rss>

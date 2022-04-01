@@ -23,9 +23,22 @@ include_once('../simple_html_dom.php');
 // $html->clear();
 // unset($html);
 
-// scraping_generic('http://localhost/wpdev/ekiline/blog/', 'h2 a' );
+$urls = [
+	'https://www.fondounido.org.mx/historias',
+	'https://www.fondounido.org.mx/historia',
+	'https://www.fondounido.org.mx/duplicado-historia',
+	'https://www.fondounido.org.mx/duplicado-2-historias',
+	'https://www.fondounido.org.mx/duplicado-3',
+	'https://www.fondounido.org.mx/duplicado-4',
+	'https://www.fondounido.org.mx/duplicado-5',
+	'https://www.fondounido.org.mx/duplicado-6',
+];
 
-scraping_generic('https://www.fondounido.org.mx/historias', 'div.card a' );
+foreach( $urls as $img_item ) {
+	scraping_generic( $img_item, 'div.card a' );
+}
+
+// scraping_generic('https://www.fondounido.org.mx/historias', 'div.card a' );
 
 function scraping_generic( $url, $search ) {
 
@@ -40,7 +53,7 @@ function scraping_generic( $url, $search ) {
 		$the_html = file_get_html($nu_url);
 
 		// 1. Funcion, buscar titulo.
-		$the_title = $the_html->find( 'h1', 1 )->plaintext;
+		$the_title = $the_html->find( 'h1', 0 )->plaintext;
 
 		// 1.2 convertir titulo a nicename.
 		$the_nicename = ekiline_cleanspchar($the_title);
@@ -49,31 +62,40 @@ function scraping_generic( $url, $search ) {
 		$the_id = rand(1000,10000);
 
 		// 2. Funcion, buscar imagen principal.
-		$img_obj     = 'div.page-content h1 img[src]';
-		// $img_obj_url = $the_html->find( $img_obj, 0 )->src;
 		// corrección para links de BLOG, halar cualquier imagen dentro de post, particularmente la ultima que halle.
-		$img_obj_url = $the_html->find( 'div.page-content img', -1)->src;
+		// $img_obj_url = $the_html->find( 'div.page-content img', -1)->src;
+		// correccion para historias.
+		$img_obj_url = $the_html->find( 'section[style*=background-image]', 0);
+		$img_obj_url = get_string_between($img_obj_url, 'url(\'', '\')');
 
 		// 3. Function, buscar contenido: contenedor > primer div > ultimo div.
-		// $filter_content = $the_html->find( 'div.page-content', 0 )->find( 'div', 1 )->find( 'div', -1 )->innertext;
 		// corrección para links de BLOG, hacer más preciso el contenido.
-		$filter_content = $the_html->find( 'div.page-content div div', 0 )->find( 'div', 2 )->innertext;
+		// $filter_content = $the_html->find( 'div.page-content div div', 0 )->find( 'div', 2 )->innertext;
+		// correccion para historias.
+		$filter_content = $the_html->find( '.body-min-height', 0 )->find( '.container', 1 )->find( 'div', 0 )->innertext;
 
 		$the_content = str_get_html( $filter_content );
-		// limpiar.
-		foreach ( $the_content->find( 'h1, img, .carousel-item, .mceEditable, .mceNonEditable' ) as $unwanted ) {
+		// limpiar contenido no deseado, elementos de bloque.
+		foreach ( $the_content->find( 'h1, img' ) as $unwanted ) {
 			$unwanted->outertext = '';
+		}
+		// limpiar contenido no deseado, atributos.
+		foreach ( $the_content->find('p, ul, li, h1, h2, h3, h4, h5, h6 div') as $clean_item ) {
+			$clean_item->style = null;
+			$clean_item->class = null;
 		}
 		$the_content->load( $the_content->save() );
 
-		// resultado.
-		echo '<div style="border-bottom:red 1px solid;padding:10px;">';
-		echo '<code>' . $the_id . '</code>';
-		echo '<code>' . $the_nicename . '</code>';
-		echo '<h1>' . $the_title . '</h1>';
+		// // resultado.
+		// echo '<div style="border-bottom:red 1px solid;padding:10px;">';
+		// echo '<code>' . $the_id . '</code><br>';
+		// echo '<code>' . $the_nicename . '</code>';
+		// echo '<h1>' . $the_title . '</h1>';
+
 		echo '<img src="' . $img_obj_url . '" width="100px" height="auto">';
-		echo $the_content;
-		echo '</div>';
+		// // echo $img_obj_url;
+		// echo $the_content;
+		// echo '</div>';
 
 	}
 
@@ -101,3 +123,16 @@ function ekiline_cleanspchar($text) {
 
     return $alias;
 }
+
+function get_string_between($string, $start, $end){
+	$string = ' ' . $string;
+	$ini = strpos($string, $start);
+	if ($ini == 0) return '';
+	$ini += strlen($start);
+	$len = strpos($string, $end, $ini) - $ini;
+	return substr($string, $ini, $len);
+}
+// $fullstring = 'this is my [tag]dog[/tag]';
+// $parsed = get_string_between($fullstring, '[tag]', '[/tag]');
+// echo $parsed; // (result = dog)
+

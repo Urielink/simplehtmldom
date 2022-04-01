@@ -17,9 +17,7 @@ function scraping_generic( $url, $search ) {
 		$the_html = file_get_html($nu_url);
 
 		// 1. Funcion, buscar titulo.
-		// $the_title = $the_html->find( 'h1', 1 )->plaintext;
-		// correccion para historias.
-		$the_title = $the_html->find( 'h1', 0 )->plaintext;
+		$the_title = $the_html->find( 'h1', 1 )->plaintext;
 
 		// 1.2 convertir titulo a nicename.
 		$the_nicename = ekiline_cleanspchar($the_title);
@@ -28,35 +26,20 @@ function scraping_generic( $url, $search ) {
 		$the_id = rand(1000,10000);
 
 		// 2. Funcion, buscar imagen principal.
-		// $img_obj     = 'div.page-content h1 img[src]';
+		$img_obj     = 'div.page-content h1 img[src]';
 		// $img_obj_url = $the_html->find( $img_obj, 0 )->src;
 		// corrección para links de BLOG, halar cualquier imagen dentro de post, particularmente la ultima que halle.
-		// $img_obj_url = $the_html->find( 'div.page-content img', -1)->src;
-		// correccion para historias.
-		$img_obj_url = $the_html->find( 'section[style*=background-image]', 0);
-		$img_obj_url = get_string_between($img_obj_url, 'url(\'', '\')');
+		$img_obj_url = $the_html->find( 'div.page-content img', -1)->src;
 
 		// 3. Function, buscar contenido: contenedor > primer div > ultimo div.
 		// $filter_content = $the_html->find( 'div.page-content', 0 )->find( 'div', 1 )->find( 'div', -1 )->innertext;
 		// corrección para links de BLOG, hacer más preciso el contenido.
-		// $filter_content = $the_html->find( 'div.page-content div div', 0 )->find( 'div', 2 )->innertext;
-		// correccion para historias.
-		$filter_content = $the_html->find( '.body-min-height', 0 )->find( '.container', 1 )->find( 'div', 0 )->innertext;
+		$filter_content = $the_html->find( 'div.page-content div div', 0 )->find( 'div', 2 )->innertext;
 
-		// $the_content = str_get_html( $filter_content );
-		// // limpiar.
-		// foreach ( $the_content->find( 'h1, img, .carousel-item, .mceEditable, .mceNonEditable' ) as $unwanted ) {
-		// 	$unwanted->outertext = '';
-		// }
 		$the_content = str_get_html( $filter_content );
-		// limpiar contenido no deseado, elementos de bloque.
-		foreach ( $the_content->find( 'h1, img' ) as $unwanted ) {
+		// limpiar.
+		foreach ( $the_content->find( 'h1, img, .carousel-item, .mceEditable, .mceNonEditable' ) as $unwanted ) {
 			$unwanted->outertext = '';
-		}
-		// limpiar contenido no deseado, atributos.
-		foreach ( $the_content->find('p, ul, li, h1, h2, h3, h4, h5, h6 div') as $clean_item ) {
-			$clean_item->style = null;
-			$clean_item->class = null;
 		}
 		$the_content->load( $the_content->save() );
 
@@ -97,13 +80,4 @@ function ekiline_cleanspchar($text) {
     }
 
     return $alias;
-}
-
-function get_string_between($string, $start, $end){
-	$string = ' ' . $string;
-	$ini = strpos($string, $start);
-	if ($ini == 0) return '';
-	$ini += strlen($start);
-	$len = strpos($string, $end, $ini) - $ini;
-	return substr($string, $ini, $len);
 }
